@@ -23,6 +23,7 @@ if((mmRain == 0) or str(mmRain)=="None"):
 else:
     msg ="DAMN Daniel, pack that raincoat: {} mm".format(mmRain)
     print(msg)
-    
+
 for user in VALID_USERS:
+    print("Account: {}, Nachricht: {}".format(user, msg))
     bot.sendMessage(user, msg)
