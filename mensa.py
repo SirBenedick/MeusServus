@@ -9,7 +9,7 @@ import json
 
 config = json.load(open('private/config.json'))
 BOT_TOKEN = config['telegram']['token']
-VALID_USER = int(config['telegram']['account'])
+VALID_USERS = config['telegram']['account']
 bot = telepot.Bot(BOT_TOKEN)
 
 url = "https://www.stw-ma.de/Essen+_+Trinken/Menüpläne/Hochschule+Mannheim.html"
@@ -52,4 +52,5 @@ for menu in menuList:
     price = menu[2][0]
     msg = """*{}*:\n{}\n*Preis*: {} """.format(name, menuIngriedients, price)
     print(msg)
-    bot.sendMessage(VALID_USER, msg, parse_mode= 'Markdown')
+    for user in VALID_USERS:
+        bot.sendMessage(user, msg, parse_mode= 'Markdown')
