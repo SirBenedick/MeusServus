@@ -6,7 +6,7 @@ import telepot
 
 config = json.load(open('private/config.json'))
 BOT_TOKEN = config['telegram']['token']
-VALID_USER = int(config['telegram']['account'])
+VALID_USERS = config['telegram']['account']
 UWAPI = config['uw']['apikey']
 LOCATION = config['uw']['location']
 
@@ -20,8 +20,9 @@ mmRain = data['forecast']['simpleforecast']['forecastday'][0]['qpf_day']['mm']
 if((mmRain == 0) or str(mmRain)=="None"):
     msg = "Rise and shine.\nIt aint gonna rain today."
     print(msg)
-    bot.sendMessage(VALID_USER, msg)
 else:
     msg ="DAMN Daniel, pack that raincoat: {} mm".format(mmRain)
     print(msg)
-    bot.sendMessage(VALID_USER, msg)
+    
+for user in VALID_USERS:
+    bot.sendMessage(user, msg)
