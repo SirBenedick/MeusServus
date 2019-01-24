@@ -43,6 +43,7 @@ module Helper
             puts "#{tempArray}"
             posTabelle.push(tempArray)
         end
+        puts "posTabelleLength: #{posTabelle.length}"
         posTabelle
     end
 
@@ -50,47 +51,43 @@ module Helper
         puts "Neue Noten Senden, falls neue da"
         file_name = "oldGrads.txt"
         oldGrades = File.read(file_name).split("-")
-
-        sendNewGrade = false
-        posTabelle.each do |row| 
-            if(row[3] != "" && !(oldGrades.include? row[0]))
-                Telegram::Bot::Client.run(token) do |bot|
-                    bot.api.send_message(chat_id: 69127513, text: "#{row}")
+        Telegram::Bot::Client.run(token) do |bot|
+            sendNewGrade = false
+            posTabelle.each do |row| 
+                if(row[3] != "" && !(oldGrades.include? row[0]))
+                        puts "Neue Note wird verschickt: #{row[1]}"
+                        bot.api.send_message(chat_id: Config::TELEGRAMACCOUNT, text: "#{row}")
+                    oldGrades.push(row[0])
+                    sendNewGrade = true
                 end
-                oldGrades.push(row[0])
-                sendNewGrade = true
             end
-        end
-        newOut = oldGrades.join("-")
-        File.write(file_name, newOut)
-        
-        average = Helper.calculateAverage(posTabelle)
-        if sendNewGrade
-            Telegram::Bot::Client.run(token) do |bot|
-                bot.api.send_message(chat_id: 69127513, text: "Neuer Durchschnitt: #{average}")
-            end
-        elsif !sendNewGrade && Time.now.hour == 20
-            Telegram::Bot::Client.run(token) do |bot|
-                bot.api.send_message(chat_id: 69127513, text: "Keine neuen Noten. \n Durchschnitt: #{average}")
+            newOut = oldGrades.join("-")
+            File.write(file_name, newOut)
+            
+            average = Helper.calculateAverage(posTabelle)
+            if sendNewGrade
+                    bot.api.send_message(chat_id: Config::TELEGRAMACCOUNT, text: "Neuer Durchschnitt: #{average}")
+            elsif !sendNewGrade && Time.now.hour == 20
+                    bot.api.send_message(chat_id: Config::TELEGRAMACCOUNT, text: "Keine neuen Noten. \n Durchschnitt: #{average}")
             end
         end
     end
     
     
     def Helper.calculateAverage(posTabelle)
-        ##berechne Durchschnitt
-        tempECTS = 0.0
-        average = 0.0
-        average = posTabelle.reduce(average) do |ave, row|
-            if( row[3]!= "" && row[0]!= "2000")
-                tempECTS += row[5].to_f
-                puts "#{row[3]}*#{row[5]}"
-                ave += row[3].to_f * row[5].to_f
-                puts "new ave: #{ave}"
-                ave
+        puts "Calculating Average"
+        allECTS = 0.0
+        average = posTabelle.reduce(0) do |ave, row|
+            eachGrade = row[3].gsub(",",".").to_f
+            eachECTS = row[5].gsub(",",".").to_f
+            if( eachGrade != 0.0 && row[0]!= "2000")
+                allECTS += eachECTS
+                puts "Calculating average for #{row[1]}: #{eachGrade}*#{eachECTS}"
+                ave += eachGrade * eachECTS
             end
             ave
         end
-        average/tempECTS
+        puts "New Average: #{average/allECTS}"
+        average/allECTS
     end
 end
